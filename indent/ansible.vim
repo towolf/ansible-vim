@@ -1,8 +1,21 @@
-let s:save_cpo = &cpo
-set cpo&vim
+" Vim indent file
+" Language:        YAML (with Ansible)
+" Maintainer:      Benji Fisher, Ph.D. <benji@FisherFam.org>
+" Author:          Chase Colman <chase@colman.io>
+" Version:         1.0
+" Latest Revision: 2014-11-18
+" URL:             https://github.com/chase/vim-ansible-yaml
 
+" Only load this indent file when no other was loaded.
+if exists("b:did_indent")
+  finish
+endif
+
+let b:did_indent = 1
+
+setlocal sw=2 ts=2 sts=2 et
 setlocal indentexpr=GetAnsibleIndent(v:lnum)
-setlocal indentkeys=!^F,o,O,0#,0},0],<:>,-,*<Return>
+setlocal indentkeys=!^Fo,O,0#,<:>,-
 setlocal nosmartindent
 setlocal expandtab
 setlocal softtabstop=2
@@ -19,41 +32,38 @@ let s:dictionary_entry = '\v^\s*[^:-]+:\s*$' " with_items:
 let s:key_value = '\v^\s*[^:-]+:\s*\S' " apt: name=package
 let s:scalar_value = '\v:\s*[>|\|]\s*$' " shell: >
 
+
+" Only define the function once.
 if exists('*GetAnsibleIndent')
   finish
 endif
 
 function GetAnsibleIndent(lnum)
-  if a:lnum == 1 || !prevnonblank(a:lnum-1)
+  " Check whether the user has set g:ansible_options["ignore_blank_lines"].
+  let ignore_blanks = !exists('g:ansible_options["ignore_blank_lines"]')
+	\ || g:ansible_options["ignore_blank_lines"]
+
+  let prevlnum = ignore_blanks ? prevnonblank(a:lnum - 1) : a:lnum - 1
+  if prevlnum == 0
     return 0
   endif
-  if exists("g:ansible_unindent_after_newline")
-    if (a:lnum -1) != prevnonblank(a:lnum - 1)
-      return 0
-    endif
-  endif
-  let prevlnum = prevnonblank(a:lnum - 1)
-  let maintain = indent(prevlnum)
-  let increase = maintain + &sw
+  let prevline = getline(prevlnum)
 
-  let line = getline(prevlnum)
-  if line =~ s:array_entry
-    if line =~ s:named_module_entry
-      return increase
-    else
-      return maintain
-    endif
-  elseif line =~ s:dictionary_entry
+  let indent = indent(prevlnum)
+  let increase = indent + &sw
+
+  " Do not adjust indentation for comments
+  if prevline =~ '\%(^\|\s\)#'
+    return indent
+  elseif prevline =~ ':\s*[>|]?$'
     return increase
-  elseif line =~ s:key_value
-    if line =~ s:scalar_value
-      return increase
-    else
-      return maintain
-    endif
+  elseif prevline =~ ':$'
+    return increase
+  elseif prevline =~ '^\s*-\s*$'
+    return increase
+  elseif prevline =~ '^\s*-\s\+[^:]\+:\s*\S'
+    return increase
   else
-    return maintain
+    return indent
   endif
 endfunction
-
-let &cpo = s:save_cpo

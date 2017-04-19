@@ -31,23 +31,23 @@ syn cluster jinjaSLSBlocks add=jinjaTagBlock,jinjaVarBlock,jinjaComment
 syn region jinjaTagBlock matchgroup=jinjaTagDelim start=/{%-\?/ end=/-\?%}/ containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaRaw,jinjaString,jinjaNested,jinjaComment,@jinjaSLSBlocks
 syn region jinjaVarBlock matchgroup=jinjaVarDelim start=/{{-\?/ end=/-\?}}/ containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaRaw,jinjaString,jinjaNested,jinjaComment,@jinjaSLSBlocks
 syn region jinjaComment matchgroup=jinjaCommentDelim start="{#" end="#}" containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaString,@jinjaSLSBlocks
-highlight link jinjaVariable Constant
-highlight link jinjaVarDelim Delimiter
+highlight link jinjaVariable LightSpecial
+highlight link jinjaVarDelim Folded
 
 " YAML
 " ================================
 
 " Reset some YAML to plain styling
 " the number 80 in Ansible isn't any more important than the word root
-highlight link yamlInteger NONE
-highlight link yamlBool NONE
-highlight link yamlFlowString NONE
+" highlight link yamlInteger NONE
+" highlight link yamlBool NONE
+" highlight link yamlFlowString NONE
 " but it does make sense we visualize quotes easily
 highlight link yamlFlowStringDelimiter Delimiter
 
 fun! s:attribute_highlight(attributes)
   if a:attributes =~ 'a'
-    syn match ansible_attributes "\v\w+\=" containedin=yamlPlainScalar
+    syn match ansible_attributes "\v(\w|\.)+\=" containedin=yamlPlainScalar
   else
     syn match ansible_attributes "\v^\s*\w+\=" containedin=yamlPlainScalar
   endif
@@ -67,20 +67,22 @@ else
 endif
 
 if exists("g:ansible_name_highlight")
-  syn keyword ansible_name name containedin=yamlBlockMappingKey contained
+  syn keyword ansible_name name role containedin=yamlBlockMappingKey contained
   if g:ansible_name_highlight =~ 'd'
-    highlight link ansible_name Comment
+    highlight link ansible_name Name
   else
     highlight link ansible_name Underlined
   endif
 endif
 
-syn keyword ansible_debug_keywords debug containedin=yamlBlockMappingKey contained
-highlight link ansible_debug_keywords Debug
+" syn keyword ansible_debug_keywords debug containedin=yamlBlockMappingKey contained
+" highlight link ansible_debug_keywords Debug
 
 if exists("g:ansible_extra_keywords_highlight")
-  syn keyword ansible_extra_special_keywords register always_run changed_when failed_when no_log args vars delegate_to ignore_errors containedin=yamlBlockMappingKey contained
+  syn keyword ansible_extra_special_keywords register always_run changed_when check_mode failed_when no_log args hosts pre_tasks tasks post_tasks roles vars run_once delegate_to with_items ignore_errors containedin=yamlBlockMappingKey contained
   highlight link ansible_extra_special_keywords Statement
+  syn keyword ansible_extra_special_tags tags containedin=yamlBlockMappingKey contained
+  highlight link ansible_extra_special_tags Title
 endif
 
 syn keyword ansible_special_keywords include until retries delay when only_if become become_user block rescue always notify containedin=yamlBlockMappingKey contained

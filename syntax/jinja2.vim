@@ -113,16 +113,16 @@ if version >= 508 || !exists("did_jinja_syn_inits")
   HiLink jinjaRawDelim jinja
 
   HiLink jinjaSpecial Special
-  HiLink jinjaOperator Normal
+  HiLink jinjaOperator PreProc
   HiLink jinjaRaw Normal
   HiLink jinjaTagBlock PreProc
   HiLink jinjaVarBlock PreProc
-  HiLink jinjaStatement Statement
-  HiLink jinjaFilter Function
+  HiLink jinjaStatement PreProc
+  HiLink jinjaFilter LightFunction
   HiLink jinjaBlockName Function
-  HiLink jinjaVariable Identifier
-  HiLink jinjaString Constant
-  HiLink jinjaNumber Constant
+  HiLink jinjaVariable Statement
+  HiLink jinjaString LightConstant
+  HiLink jinjaNumber Statement
   HiLink jinjaComment Comment
 
   delcommand HiLink
