@@ -26,8 +26,8 @@ syn cluster jinjaSLSBlocks add=jinjaTagBlock,jinjaVarBlock,jinjaComment
 syn region jinjaTagBlock matchgroup=jinjaTagDelim start=/{%-\?/ end=/-\?%}/ containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaRaw,jinjaString,jinjaNested,jinjaComment,@jinjaSLSBlocks
 syn region jinjaVarBlock matchgroup=jinjaVarDelim start=/{{-\?/ end=/-\?}}/ containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaRaw,jinjaString,jinjaNested,jinjaComment,@jinjaSLSBlocks
 syn region jinjaComment matchgroup=jinjaCommentDelim start="{#" end="#}" containedin=ALLBUT,jinjaTagBlock,jinjaVarBlock,jinjaString,@jinjaSLSBlocks
-highlight link jinjaVariable Constant
-highlight link jinjaVarDelim Delimiter
+highlight link jinjaVariable LightSpecial
+highlight link jinjaVarDelim Folded
 
 " YAML
 " ================================
@@ -40,9 +40,9 @@ endif
 
 " Reset some YAML to plain styling
 " the number 80 in Ansible isn't any more important than the word root
-highlight link yamlInteger NONE
-highlight link yamlBool NONE
-highlight link yamlFlowString NONE
+" highlight link yamlInteger NONE
+" highlight link yamlBool NONE
+" highlight link yamlFlowString NONE
 " but it does make sense we visualize quotes easily
 highlight link yamlFlowStringDelimiter Delimiter
 " This is only found in stephypy/vim-yaml, since it's one line it isn't worth
@@ -51,7 +51,7 @@ highlight link yamlConstant NONE
 
 fun! s:attribute_highlight(attributes)
   if a:attributes =~ 'a'
-    syn match ansible_attributes "\v\w+\=" containedin=yamlPlainScalar
+    syn match ansible_attributes "\v(\w|\.)+\=" containedin=yamlPlainScalar
   else
     syn match ansible_attributes "\v^\s*\w+\=" containedin=yamlPlainScalar
   endif
@@ -71,20 +71,22 @@ else
 endif
 
 if exists("g:ansible_name_highlight")
-  execute 'syn keyword ansible_name name containedin='.s:yamlKey.' contained'
+  execute 'syn keyword ansible_name name role containedin='.s:yamlKey.' contained'
   if g:ansible_name_highlight =~ 'd'
-    highlight link ansible_name Comment
+    highlight link ansible_name Todo
   else
     highlight link ansible_name Underlined
   endif
 endif
 
 execute 'syn keyword ansible_debug_keywords debug containedin='.s:yamlKey.' contained'
-highlight link ansible_debug_keywords Debug
+highlight link ansible_debug_keywords Todo
 
 if exists("g:ansible_extra_keywords_highlight")
-  execute 'syn keyword ansible_extra_special_keywords register always_run changed_when failed_when no_log args vars delegate_to ignore_errors containedin='.s:yamlKey.' contained'
+  execute 'syn keyword ansible_extra_special_keywords register always_run changed_when failed_when no_log args vars delegate_to ignore_errors meta hosts pre_tasks tasks post_tasks roles vars run_once diff check_mode containedin='.s:yamlKey.' contained'
   highlight link ansible_extra_special_keywords Statement
+  execute 'syn keyword ansible_extra_special_tags tags containedin=yamlBlockMappingKey contained'
+  highlight link ansible_extra_special_tags Title
 endif
 
 execute 'syn keyword ansible_normal_keywords include include_tasks import_tasks until retries delay when only_if become become_user block rescue always notify containedin='.s:yamlKey.' contained'
@@ -95,6 +97,7 @@ else
 endif
 
 execute 'syn match ansible_with_keywords "\vwith_.+" containedin='.s:yamlKey.' contained'
+execute 'syn keyword ansible_with_keywords loop containedin='.s:yamlKey.' contained'
 if exists("g:ansible_with_keywords_highlight")
   execute 'highlight link ansible_with_keywords '.g:ansible_with_keywords_highlight
 else
